@@ -6,3 +6,17 @@ jobs:
     steps:
       - checkout
       - run: echo "Hello, World"
+  deploy:
+    docker:
+      - image: circleci/golang:latest
+    steps:
+      - checkout
+      - run: echo "Deploy!"
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
