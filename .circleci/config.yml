@@ -6,17 +6,21 @@ jobs:
     steps:
       - checkout
       - run: echo "Hello, World"
-  deploy:
-    docker:
-      - image: circleci/golang:latest
-    steps:
-      - checkout
-      - run: echo "Deploy!"
+      - run: echo "${CIRCLE_BRANCH}"
+      - run: echo "${CIRCLE_TAG}"
+      - run: echo "${CIRCLE_TAG:-${CIRCLE_BRANCH}}"
+      - deploy:
+          name: deploy build artifact
+          command: |
+            if [ "${CIRCLE_TAG}" != "" -o "${CIRCLE_BRANCH}" == "master" ]; then
+              [ "${CIRCLE_TAG}" != "" ] && TAG=${CIRCLE_TAG} || TAG=latest
+              echo "Deploy! ${TAG}"
+            fi
 workflows:
   version: 2
   build-and-deploy:
     jobs:
-      - build
-      - deploy:
-          requires:
-            - build
+      - build:
+          filters:
+            tags:
+              only: /v.*/
