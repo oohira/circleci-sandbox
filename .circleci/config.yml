@@ -9,11 +9,22 @@ jobs:
       - run: echo "${CIRCLE_BRANCH}"
       - run: echo "${CIRCLE_TAG}"
       - run: echo "${CIRCLE_TAG:-${CIRCLE_BRANCH}}"
+      - run:
+          command: |
+            mkdir -p /tmp/workspace/build
+            echo "awesome artifact" > /tmp/workspace/build/output.txt
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - build/*
   deploy:
     docker:
       - image: circleci/golang:latest
     steps:
       - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: cat /tmp/workspace/build/output.txt
       - run:
           name: deploy
           command: |
